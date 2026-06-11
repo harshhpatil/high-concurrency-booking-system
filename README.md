@@ -22,27 +22,39 @@ This API implements a Mutex (Mutual Exclusion) Lock using Redis.
 
 ## API Endpoints
 
-### 1. Initialize Event
+### 1. Health Check
+```
+GET /health
+```
+Returns API health status.
+
+### 2. Initialize Event
 ```
 POST /events
 ```
 Creates a new event with a set pool of available seats.
 
-### 2. The Vulnerable Route (For Testing)
+### 3. The Vulnerable Route (For Testing)
 ```
 POST /book/bad
 ```
 A standard booking route vulnerable to concurrent requests. Used to simulate and measure database corruption under load.
 
-### 3. The Protected Route (Production)
+### 4. The Protected Route (Production)
 ```
-POST /book/fixed
+POST /book/good
 ```
 The Redis-protected booking route. Ensures absolute database integrity by forcing atomic operations via Mutex locking.
 
+### 5. Event Stats
+```
+GET /events/:id/stats
+```
+Returns booking statistics for an event (initialSeats, remainingSeats, actualTicketsSold).
+
 ## Running the Concurrency Test
 
-This project includes a Node.js script to simulate high concurrency.
+This project includes test scripts in the `./testing/` folder to simulate high concurrency.
 
 **Prerequisites:**
 - Ensure MongoDB and Redis are running locally
@@ -52,12 +64,12 @@ This project includes a Node.js script to simulate high concurrency.
 node src/index.js
 ```
 
-**Run the simulation script** to fire 50 simultaneous requests at the exact same millisecond (bad api route):
+**Run the vulnerable route test** to fire 50 simultaneous requests at the exact same millisecond:
 ```bash
 node ./testing/test-race-condition-bad.js
 ```
 
-**Run the simulation script** to fire 50 simultaneous requests at the exact same millisecond (good api route):
+**Run the protected route test** to fire 50 simultaneous requests at the exact same millisecond:
 ```bash
 node ./testing/test-race-condition-good.js
 ```
